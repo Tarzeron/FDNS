@@ -127,8 +127,13 @@ contract GNS {
     function getRecords(string _name) view public returns(bytes[]){
         if(!isNameExist(_name))
             return new bytes[](0);
+        address addressOfOwner = _ownerOfName[_name];
+        uint128[] memory listOfRecords = _recordIdsForOwner[addressOfOwner];
+        bytes[] result = new bytes[](listOfRecords.length);
+        for(uint128 i=0;i<listOfRecords.length;i++)
             
-        return new bytes[](0);
+            
+        return result;
     }
     
     function isNameExist(string _name) view public returns(bool){
