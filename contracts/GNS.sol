@@ -206,4 +206,9 @@ contract GNS {
     function stringToHexHelper(string what) pure public returns(bytes) {
         return bytes(what);
     }
+    
+    /*
+    "name",0x0000000003313233
+    
+    */
 }
