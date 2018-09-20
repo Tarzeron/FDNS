@@ -157,6 +157,8 @@ contract GNS {
         removeFirstElementInArrayByValue(_recordIdsForOwner[msg.sender], _recordId);
         uint8 typeOfRecord = uint8(_records[_recordId][0]);
         removeFirstElementInArrayByValue(_recordIdsForOwnerByType[msg.sender][typeOfRecord], _recordId);
+        if(_recordIdsForOwner[msg.sender].length == 0)
+            _ownerOfName[_name] = 0;//give freedom to a name?!
     }
     
     function removeRecordByValue(
