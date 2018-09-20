@@ -1,13 +1,9 @@
 pragma solidity ^0.4.25;
+pragma experimental ABIEncoderV2;
 
 contract GNS {
     
-    struct Record{
-        uint8 typeOfRecord;
-        bytes body;
-    }
-    
-    Record[] private _records;
+    bytes[] private _records;
     mapping (address => uint128[]) private _recordIdsForOwner;
     mapping (string => address) private _ownerOfName;
     mapping (address => string) private _namesOfOwner;
@@ -26,51 +22,57 @@ contract GNS {
         return true;
     }
     
-    function isValidString(bytes _str) pure public returns(bool) {
-        bytes memory strInByteArray = bytes(_str);
-        for(uint128 i=0; i<strInByteArray.length; i++)
-            if(strInByteArray[i] == 0)
+    function isValidString(bytes _str, uint32 _offset, uint32 _length) pure public returns(bool) {
+        if(_str.length <= _offset+_length)
+            return false;
+        for(uint128 i=_offset; i<_length; i++)
+            if(_str[i] == 0)
                 return false;
         return true;
     }
     
-    function bytesToUint32LE(bytes _what) pure public returns(uint32) {
-        require(_what.length >= 4);
-        return uint32(_what[0]) | (uint32(_what[1])<<8) | (uint32(_what[2])<<16) | (uint32(_what[3])<<24);
+    function bytesToUint32LE(bytes _what, uint32 _offset) pure public returns(uint32) {
+        require(_what.length >= _offset + 4);
+        return uint32(_what[_offset]) 
+            | (uint32(_what[_offset + 1])<<8) 
+            | (uint32(_what[_offset + 2])<<16) 
+            | (uint32(_what[_offset + 3])<<24);
     }
     
-    function isValidFDNSRecord(uint8 _type, bytes _recorBody) pure public returns(bool) {
-        if(_type != 0)
+    function isValidFDNSRecord(bytes _rawRecord) pure public returns(bool) {
+        uint8 typeOfRcord = uint8(_rawRecord[0]);
+        if(typeOfRcord != 0)
             return false;
-        if(_recorBody.length < 4)
+        if(_rawRecord.length < 5)
             return false;
-        // if(_recorBody.length >= uint32(0)-1)
-        //     return false;
-        if(uint32(_recorBody.length - 4) != bytesToUint32LE(_recorBody))
+        if(uint32(_rawRecord.length - 5) != bytesToUint32LE(_rawRecord, 1))
             return false;
         return true;
     }
     
-    function isValidIPv4Record(uint8 _type, bytes _recorBody) pure public returns(bool) {
-        if(_type != 1)
+    function isValidIPv4Record(bytes _rawRecord) pure public returns(bool) {
+        uint8 typeOfRcord = uint8(_rawRecord[0]);
+        if(typeOfRcord != 1)
             return false;
-        if(_recorBody.length != 4)
-            return false;
-        return true;
-    }
-    
-    function isValidIPv6Record(uint8 _type, bytes _recorBody) pure public returns(bool) {
-        if(_type != 2)
-            return false;
-        if(_recorBody.length != 16)
+        if(_rawRecord.length != 5)
             return false;
         return true;
     }
     
-    function isValidDNSRecord(uint8 _type, bytes _recorBody) pure public returns(bool) {
-        if(_type != 3)
+    function isValidIPv6Record(bytes _rawRecord) pure public returns(bool) {
+        uint8 typeOfRcord = uint8(_rawRecord[0]);
+        if(typeOfRcord != 2)
             return false;
-        if(!isValidString(_recorBody))
+        if(_rawRecord.length != 17)
+            return false;
+        return true;
+    }
+    
+    function isValidDNSRecord(bytes _rawRecord) pure public returns(bool) {
+        uint8 typeOfRcord = uint8(_rawRecord[0]);
+        if(typeOfRcord != 3)
+            return false;
+        if(!isValidString(_rawRecord, 1, uint32(_rawRecord.length - 1)))
             return false;
         return true;
     }
@@ -78,19 +80,20 @@ contract GNS {
     /**
      * If type of protocol not in range for custom or not unknow type, the  function the return false
      */
-    function isValidRecord(uint8 _type, bytes _recorBody) pure public returns(bool) {
-        if(_recorBody.length == 0)
+    function isValidRecord(bytes _rawRecord) pure public returns(bool) {
+        if(_rawRecord.length <= 1)
             return false;
-        if(_type >= 64 && _type <= 255)
+        uint8 typeOfRcord = uint8(_rawRecord[0]);
+        if(typeOfRcord >= 64 && typeOfRcord <= 255)
             return true;
-        if(_type == 0)
-            return isValidFDNSRecord(_type, _recorBody);
-        else if(_type == 1)
-            return isValidIPv4Record(_type, _recorBody);
-        else if(_type == 2)
-            return isValidIPv6Record(_type, _recorBody);
-        else if(_type == 3)
-            return isValidDNSRecord(_type, _recorBody);
+        if(typeOfRcord == 0)
+            return isValidFDNSRecord(_rawRecord);
+        else if(typeOfRcord == 1)
+            return isValidIPv4Record(_rawRecord);
+        else if(typeOfRcord == 2)
+            return isValidIPv6Record(_rawRecord);
+        else if(typeOfRcord == 3)
+            return isValidDNSRecord(_rawRecord);
         return false;
     }
     
@@ -101,12 +104,10 @@ contract GNS {
 
     function createRecord(
             string _name, 
-            uint8 _type, 
-            bytes _recorBody) 
+            bytes _rawRecord) 
             onlyOwnerOfName(_name)
             public {
-        Record memory record = Record(_type, _recorBody);
-        uint128 recordIndex = uint128(_records.push(record)-1);
+        uint128 recordIndex = uint128(_records.push(_rawRecord)-1);
         _recordIdsForOwner[msg.sender].push(recordIndex) ;
     }
     
@@ -121,6 +122,17 @@ contract GNS {
             }
         }
         recordIdsForOwner.length--;
+    }
+    
+    function getRecords(string _name) view public returns(bytes[]){
+        if(!isNameExist(_name))
+            return new bytes[](0);
+            
+        return new bytes[](0);
+    }
+    
+    function isNameExist(string _name) view public returns(bool){
+        return _ownerOfName[_name] != 0;
     }
     
     
