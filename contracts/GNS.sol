@@ -1,5 +1,4 @@
 pragma solidity ^0.4.25;
-pragma experimental ABIEncoderV2;
 
 contract GNS {
     
@@ -124,15 +123,20 @@ contract GNS {
         recordIdsForOwner.length--;
     }
     
-    function getRecords(string _name) view public returns(bytes[]){
+    function getRecordsList(string _name, bool _useFilter, uint8 _typeOfRecord) view public returns(uint128[]){
         if(!isNameExist(_name))
-            return new bytes[](0);
+            return new uint128[](0);
         address addressOfOwner = _ownerOfName[_name];
         uint128[] memory listOfRecords = _recordIdsForOwner[addressOfOwner];
-        bytes[] result = new bytes[](listOfRecords.length);
-        for(uint128 i=0;i<listOfRecords.length;i++)
-            
-            
+        uint128[] memory result = new uint128[](listOfRecords.length);
+        uint128 realSiceOfResult=0;
+        for(uint128 i=0;i<listOfRecords.length;i++) {
+            if(_useFilter && uint8(_records[listOfRecords[i]][0]) != _typeOfRecord)
+                continue;
+            result[realSiceOfResult] = listOfRecords[i];
+            realSiceOfResult++;
+        }
+        result.length = realSiceOfResult;
         return result;
     }
     
