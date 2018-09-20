@@ -3,13 +3,20 @@ pragma solidity ^0.4.25;
 contract GNS {
     
     bytes[] private _records;
+    mapping (address => mapping (uint8 => uint128[])) private _recordIdsForOwnerByType;
     mapping (address => uint128[]) private _recordIdsForOwner;
     mapping (string => address) private _ownerOfName;
     mapping (address => string) private _namesOfOwner;
+    mapping (bytes => uint128) private _existRawRecordsByContent;
     
     modifier onlyOwnerOfName(string _name) {
         address owner = _ownerOfName[_name];
         require(owner == 0 || owner == msg.sender);
+        _;
+    }
+    
+    modifier onlyExistName(string _name) {
+        require(isNameExist(_name));
         _;
     }
     
@@ -108,6 +115,9 @@ contract GNS {
             public {
         uint128 recordIndex = uint128(_records.push(_rawRecord)-1);
         _recordIdsForOwner[msg.sender].push(recordIndex) ;
+        
+        _existRawRecordsByContent!!!!!!!!!!!
+        _recordIdsForOwnerByType!!!!!!!!!!!
     }
     
     function removeRecordByIndex(uint128 _recordIndex) public {
@@ -123,21 +133,22 @@ contract GNS {
         recordIdsForOwner.length--;
     }
     
-    function getRecordsList(string _name, bool _useFilter, uint8 _typeOfRecord) view public returns(uint128[]){
-        if(!isNameExist(_name))
-            return new uint128[](0);
+    function getRawRecordById(uint128 _recordIndex) view public returns(bytes){
+        require(_recordIndex>=0 && _recordIndex<_records.length);
+        return _records[_recordIndex];
+    }
+    
+    function getRecordsList(string _name, 
+            bool _useFilter, 
+            uint8 _typeOfRecord) 
+            view 
+            public 
+            onlyExistName(_name)
+            returns(uint128[]){
         address addressOfOwner = _ownerOfName[_name];
-        uint128[] memory listOfRecords = _recordIdsForOwner[addressOfOwner];
-        uint128[] memory result = new uint128[](listOfRecords.length);
-        uint128 realSiceOfResult=0;
-        for(uint128 i=0;i<listOfRecords.length;i++) {
-            if(_useFilter && uint8(_records[listOfRecords[i]][0]) != _typeOfRecord)
-                continue;
-            result[realSiceOfResult] = listOfRecords[i];
-            realSiceOfResult++;
-        }
-        result.length = realSiceOfResult;
-        return result;
+        if(_useFilter)
+            return _recordIdsForOwnerByType[addressOfOwner][_typeOfRecord];
+        return _recordIdsForOwner[addressOfOwner];
     }
     
     function isNameExist(string _name) view public returns(bool){
