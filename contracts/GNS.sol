@@ -148,13 +148,13 @@ contract GNS {
     
     function removeRecordById(
             string _name,
-            uint128 _recordIndex) 
+            uint128 _recordId) 
             onlyExistName(_name)
             onlyOwnerOfName(_name)
             public {
-        removeFirstElementInArrayByValue(_recordIdsForOwner[msg.sender], _recordIndex);
-        uint8 typeOfRecord = uint8(_records[_recordIndex][0]);
-        removeFirstElementInArrayByValue(_recordIdsForOwnerByType[msg.sender][typeOfRecord], _recordIndex);
+        removeFirstElementInArrayByValue(_recordIdsForOwner[msg.sender], _recordId);
+        uint8 typeOfRecord = uint8(_records[_recordId][0]);
+        removeFirstElementInArrayByValue(_recordIdsForOwnerByType[msg.sender][typeOfRecord], _recordId);
     }
     
     function removeRecordByValue(
@@ -169,9 +169,9 @@ contract GNS {
         removeRecordById(_name, recordIndex);
     }
     
-    function getRawRecordById(uint128 _recordIndex) view public returns(bytes){
-        require(_recordIndex>=0 && _recordIndex<_records.length);
-        return _records[_recordIndex];
+    function getRawRecordById(uint128 _recordId) view public returns(bytes){
+        require(_recordId>=0 && _recordId<_records.length);
+        return _records[_recordId];
     }
     
     function getRecordsList(string _name) 
