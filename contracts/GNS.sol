@@ -3,8 +3,8 @@ pragma solidity ^0.4.25;
 contract GNS {
     
     bytes[] private _records;
-    mapping (address => mapping (uint8 => uint128[])) private _recordIdsForOwnerByType;
-    mapping (address => uint128[]) private _recordIdsForOwner;
+    mapping (string => mapping (uint8 => uint128[])) private _recordIdsForNameByType;
+    mapping (string => uint128[]) private _recordIdsForName;
     mapping (string => address) private _ownerOfName;
     // mapping (address => string) private _namesOfOwner;
     mapping (bytes => uint128) private _existRawRecordsByContent;
@@ -121,7 +121,7 @@ contract GNS {
         uint128 recordIndex = _existRawRecordsByContent[_rawRecord];
         uint8 typeOfRecord = uint8(_rawRecord[0]);
         if(recordIndex>0){
-            uint128[] memory recByType = _recordIdsForOwnerByType[msg.sender][typeOfRecord];
+            uint128[] memory recByType = _recordIdsForNameByType[_name][typeOfRecord];
             bytes32 hash = keccak256(_rawRecord);
             for(uint128 i=0;i<recByType.length;i++)
                 if(keccak256(_records[recByType[i]]) == hash)
@@ -133,8 +133,8 @@ contract GNS {
         }
         if(_ownerOfName[_name]==0)
             _ownerOfName[_name]=msg.sender;
-        _recordIdsForOwner[msg.sender].push(recordIndex);
-        _recordIdsForOwnerByType[msg.sender][typeOfRecord].push(recordIndex);
+        _recordIdsForName[_name].push(recordIndex);
+        _recordIdsForNameByType[_name][typeOfRecord].push(recordIndex);
     }
     
     function removeFirstElementInArrayByValue(uint128[] storage _where, uint128 _what) private {
@@ -154,10 +154,10 @@ contract GNS {
             onlyExistName(_name)
             onlyOwnerOfName(_name)
             public {
-        removeFirstElementInArrayByValue(_recordIdsForOwner[msg.sender], _recordId);
+        removeFirstElementInArrayByValue(_recordIdsForName[_name], _recordId);
         uint8 typeOfRecord = uint8(_records[_recordId][0]);
-        removeFirstElementInArrayByValue(_recordIdsForOwnerByType[msg.sender][typeOfRecord], _recordId);
-        if(_recordIdsForOwner[msg.sender].length == 0)
+        removeFirstElementInArrayByValue(_recordIdsForNameByType[_name][typeOfRecord], _recordId);
+        if(_recordIdsForName[_name].length == 0)
             _ownerOfName[_name] = 0;//give freedom to a name?!
     }
     
@@ -183,8 +183,7 @@ contract GNS {
             public 
             onlyExistName(_name)
             returns(uint128[]){
-        address addressOfOwner = _ownerOfName[_name];
-        return _recordIdsForOwner[addressOfOwner];
+        return _recordIdsForName[_name];
     }
     
     function getRecordsList(string _name, 
@@ -193,8 +192,7 @@ contract GNS {
             public 
             onlyExistName(_name)
             returns(uint128[]){
-        address addressOfOwner = _ownerOfName[_name];
-        return _recordIdsForOwnerByType[addressOfOwner][_typeOfRecord];
+        return _recordIdsForNameByType[_name][_typeOfRecord];
     }
     
     function isNameExist(string _name) view public returns(bool){
