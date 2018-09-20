@@ -43,10 +43,10 @@ contract GNS {
     
     function bytesToUint32LE(bytes _what, uint32 _offset) pure public returns(uint32) {
         require(_what.length >= _offset + 4);
-        return uint32(_what[_offset]) 
-            | (uint32(_what[_offset + 1])<<8) 
-            | (uint32(_what[_offset + 2])<<16) 
-            | (uint32(_what[_offset + 3])<<24);
+        return uint32(_what[_offset + 3]) 
+            | (uint32(_what[_offset + 2])<<8) 
+            | (uint32(_what[_offset + 1])<<16) 
+            | (uint32(_what[_offset + 0])<<24);
     }
     
     function isValidFDNSRecord(bytes _rawRecord) pure public returns(bool) {
