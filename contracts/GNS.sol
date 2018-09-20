@@ -131,6 +131,8 @@ contract GNS {
             recordIndex = uint128(_records.push(_rawRecord)-1);
             _existRawRecordsByContent[_rawRecord] =recordIndex;
         }
+        if(_ownerOfName[_name]==0)
+            _ownerOfName[_name]=msg.sender;
         _recordIdsForOwner[msg.sender].push(recordIndex);
         _recordIdsForOwnerByType[msg.sender][typeOfRecord].push(recordIndex);
     }
