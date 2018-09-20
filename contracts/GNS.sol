@@ -16,8 +16,10 @@ contract GNS {
     modifier onlyOwnerOfName(string _name) {
         address owner = _ownerOfName[_name];
         require(owner == 0 || owner == msg.sender);
-        if(owner == 0)
-            require(bytes(_nameOfOwner[msg.sender]).length == 0);
+        if(owner == 0){
+            bytes memory name = bytes(_nameOfOwner[msg.sender]);
+            require(name.length == 0);
+        }
         _;
     }
     
