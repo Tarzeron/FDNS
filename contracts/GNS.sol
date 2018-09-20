@@ -33,7 +33,7 @@ contract GNS {
     }
     
     function isValidString(bytes _str, uint32 _offset, uint32 _length) pure public returns(bool) {
-        if(_str.length <= _offset+_length)
+        if(_str.length < _offset+_length)
             return false;
         for(uint128 i=_offset; i<_length; i++)
             if(_str[i] == 0)
@@ -129,7 +129,7 @@ contract GNS {
         }
         if (recordIndex==0) {
             recordIndex = uint128(_records.push(_rawRecord)-1);
-            _existRawRecordsByContent[_rawRecord] =recordIndex;
+            _existRawRecordsByContent[_rawRecord] = recordIndex;
         }
         if(_ownerOfName[_name]==0)
             _ownerOfName[_name]=msg.sender;
@@ -208,7 +208,11 @@ contract GNS {
     }
     
     /*
+    "name"
     "name",0x0000000003313233
+    "name",0x03313233
+    "name",0x03313333
+    "name",0x03
     
     */
 }
