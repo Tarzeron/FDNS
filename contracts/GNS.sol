@@ -213,20 +213,33 @@ contract GNS {
     
     /*
     "name"
+    "name1"
+    "name2"
     -------create valid---------
     "name",0x0000000003313233
     "name",0x0000000003312e33
     "name",0x0000000003714233
     "name1",0x0000000003714233
+    "name",0x01ffffffaa
+    "name",0x01ffbbffaa
+    "name",0x02ffbbffaaffbbffaaffbbffaaffbbffaa
     "name",0x03313233
     "name",0x03313333
-    -------filtee valid---------
+    -------filter valid---------
     "name",0x00
     "name",0x01
     "name",0x02
     "name",0x03
     "name1",0x00
     "name2",0x00
+    ---------removing-----
+    "name",5
+    "name",0x01ffbbffaa
     ---------invalid---------
+    "name",0x00000000033132
+    "name",0x01ffffaa
+    "name",0x02ffbbffaaffbbffaaffbbffaaffbbff
+    "name",0x03
+    "name22",5
     */
 }
