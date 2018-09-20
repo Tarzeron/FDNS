@@ -209,10 +209,19 @@ contract GNS {
     
     /*
     "name"
+    -------create valid---------
     "name",0x0000000003313233
+    "name",0x0000000003312e33
+    "name",0x0000000003714233
     "name",0x03313233
     "name",0x03313333
     "name",0x03
-    
+    -------filtee valid---------
+    "name",0x00
+    "name",0x01
+    "name",0x02
+    "name",0x03
+    "name1",0x00
+    ---------invalid---------
     */
 }
