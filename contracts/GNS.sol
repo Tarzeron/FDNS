@@ -135,17 +135,38 @@ contract GNS {
         _recordIdsForOwnerByType[msg.sender][typeOfRecord].push(recordIndex);
     }
     
-    function removeRecordByIndex(uint128 _recordIndex) public {
-        uint128[] storage recordIdsForOwner = _recordIdsForOwner[msg.sender];
-        bool found=false;
-        for(uint128 i=0;i<recordIdsForOwner.length;i++) {
-            if(found)
-                recordIdsForOwner[i-1] = recordIdsForOwner[i];
-            else if(recordIdsForOwner[i] == _recordIndex){
-                found = true;
+    function removeFirstElementInArrayByValue(uint128[] storage _where, uint128 _what) private {
+        for(uint128 i=0;i<_where.length;i++) {
+            if(_where[i] == _what){
+                if(i+1<_where.length)
+                    _where[i] = _where[_where.length-1];
+                _where.length--;
+                break;
             }
         }
-        recordIdsForOwner.length--;
+    }
+    
+    function removeRecordById(
+            string _name,
+            uint128 _recordIndex) 
+            onlyExistName(_name)
+            onlyOwnerOfName(_name)
+            public {
+        removeFirstElementInArrayByValue(_recordIdsForOwner[msg.sender], _recordIndex);
+        uint8 typeOfRecord = uint8(_records[_recordIndex][0]);
+        removeFirstElementInArrayByValue(_recordIdsForOwnerByType[msg.sender][typeOfRecord], _recordIndex);
+    }
+    
+    function removeRecordByValue(
+            string _name, 
+            bytes _rawRecord) 
+            onlyExistName(_name)
+            onlyOwnerOfName(_name)
+            public {
+        uint128 recordIndex = _existRawRecordsByContent[_rawRecord];
+        if(recordIndex == 0)
+            revert();
+        removeRecordById(_name, recordIndex);
     }
     
     function getRawRecordById(uint128 _recordIndex) view public returns(bytes){
