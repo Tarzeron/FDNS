@@ -116,8 +116,8 @@ contract GNS {
         uint128 recordIndex = uint128(_records.push(_rawRecord)-1);
         _recordIdsForOwner[msg.sender].push(recordIndex) ;
         
-        _existRawRecordsByContent!!!!!!!!!!!
-        _recordIdsForOwnerByType!!!!!!!!!!!
+        // _existRawRecordsByContent!!!!!!!!!!!
+        // _recordIdsForOwnerByType!!!!!!!!!!!
     }
     
     function removeRecordByIndex(uint128 _recordIndex) public {
@@ -138,17 +138,23 @@ contract GNS {
         return _records[_recordIndex];
     }
     
+    function getRecordsList(string _name) 
+            view 
+            public 
+            onlyExistName(_name)
+            returns(uint128[]){
+        address addressOfOwner = _ownerOfName[_name];
+        return _recordIdsForOwner[addressOfOwner];
+    }
+    
     function getRecordsList(string _name, 
-            bool _useFilter, 
             uint8 _typeOfRecord) 
             view 
             public 
             onlyExistName(_name)
             returns(uint128[]){
         address addressOfOwner = _ownerOfName[_name];
-        if(_useFilter)
-            return _recordIdsForOwnerByType[addressOfOwner][_typeOfRecord];
-        return _recordIdsForOwner[addressOfOwner];
+        return _recordIdsForOwnerByType[addressOfOwner][_typeOfRecord];
     }
     
     function isNameExist(string _name) view public returns(bool){
