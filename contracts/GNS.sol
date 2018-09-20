@@ -8,9 +8,9 @@ contract GNS {
     }
     
     Record[] private _records;
-    mapping (address => uint128[]) _recordIdsForOwner;
-    mapping (string => address) _ownerOfName;
-    mapping (address => string) public namesOfOwner;
+    mapping (address => uint128[]) private _recordIdsForOwner;
+    mapping (string => address) private _ownerOfName;
+    mapping (address => string) private _namesOfOwner;
     
     modifier onlyOwnerOfName(string _name) {
         address owner = _ownerOfName[_name];
@@ -104,14 +104,13 @@ contract GNS {
             uint8 _type, 
             bytes _recorBody) 
             onlyOwnerOfName(_name)
-            public
-            returns(bool) {
+            public {
         Record memory record = Record(_type, _recorBody);
         uint128 recordIndex = uint128(_records.push(record)-1);
         _recordIdsForOwner[msg.sender].push(recordIndex) ;
     }
     
-    function removeRecord(uint128 _recordIndex) public {
+    function removeRecordByIndex(uint128 _recordIndex) public {
         uint128[] storage recordIdsForOwner = _recordIdsForOwner[msg.sender];
         bool found=false;
         for(uint128 i=0;i<recordIdsForOwner.length;i++) {
@@ -123,8 +122,6 @@ contract GNS {
         }
         recordIdsForOwner.length--;
     }
-    
-    
     
     
     //--------------------------------------------------------------------
