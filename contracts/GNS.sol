@@ -6,7 +6,7 @@ contract GNS {
     mapping (address => mapping (uint8 => uint128[])) private _recordIdsForOwnerByType;
     mapping (address => uint128[]) private _recordIdsForOwner;
     mapping (string => address) private _ownerOfName;
-    mapping (address => string) private _namesOfOwner;
+    // mapping (address => string) private _namesOfOwner;
     mapping (bytes => uint128) private _existRawRecordsByContent;
     
     constructor() public{
