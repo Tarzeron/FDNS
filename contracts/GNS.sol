@@ -6,7 +6,7 @@ contract GNS {
     mapping (string => mapping (uint8 => uint128[])) private _recordIdsForNameByType;
     mapping (string => uint128[]) private _recordIdsForName;
     mapping (string => address) private _ownerOfName;
-    // mapping (address => string) private _namesOfOwner;
+    mapping (address => string) private _nameOfOwner;
     mapping (bytes => uint128) private _existRawRecordsByContent;
     
     constructor() public{
@@ -16,6 +16,8 @@ contract GNS {
     modifier onlyOwnerOfName(string _name) {
         address owner = _ownerOfName[_name];
         require(owner == 0 || owner == msg.sender);
+        if(owner == 0)
+            require(bytes(_nameOfOwner[msg.sender]).length == 0);
         _;
     }
     
@@ -131,8 +133,10 @@ contract GNS {
             recordIndex = uint128(_records.push(_rawRecord)-1);
             _existRawRecordsByContent[_rawRecord] = recordIndex;
         }
-        if(_ownerOfName[_name]==0)
+        if(_ownerOfName[_name]==0) {
             _ownerOfName[_name]=msg.sender;
+            _nameOfOwner[msg.sender] = _name;
+        }
         _recordIdsForName[_name].push(recordIndex);
         _recordIdsForNameByType[_name][typeOfRecord].push(recordIndex);
     }
@@ -157,8 +161,10 @@ contract GNS {
         removeFirstElementInArrayByValue(_recordIdsForName[_name], _recordId);
         uint8 typeOfRecord = uint8(_records[_recordId][0]);
         removeFirstElementInArrayByValue(_recordIdsForNameByType[_name][typeOfRecord], _recordId);
-        if(_recordIdsForName[_name].length == 0)
+        if(_recordIdsForName[_name].length == 0) {
             _ownerOfName[_name] = 0;//give freedom to a name?!
+            _nameOfOwner[msg.sender] = "";
+        }
     }
     
     function removeRecordByValue(
@@ -211,15 +217,16 @@ contract GNS {
     "name",0x0000000003313233
     "name",0x0000000003312e33
     "name",0x0000000003714233
+    "name1",0x0000000003714233
     "name",0x03313233
     "name",0x03313333
-    "name",0x03
     -------filtee valid---------
     "name",0x00
     "name",0x01
     "name",0x02
     "name",0x03
     "name1",0x00
+    "name2",0x00
     ---------invalid---------
     */
 }
