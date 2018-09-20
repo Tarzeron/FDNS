@@ -132,6 +132,7 @@ contract GNS {
             _existRawRecordsByContent[_rawRecord] = recordIndex;
         }
         if(_ownerOfName[_name]==0) {
+            require(isValidName(_name));
             if(bytes(_nameOfOwner[msg.sender]).length > 0)
                 revert();
             _nameOfOwner[msg.sender] = _name;
@@ -236,6 +237,7 @@ contract GNS {
     "name",5
     "name",0x01ffbbffaa
     ---------invalid---------
+    "na.me",0x0000000003313233
     "name",0x00000000033132
     "name",0x01ffffaa
     "name",0x02ffbbffaaffbbffaaffbbffaaffbbff
