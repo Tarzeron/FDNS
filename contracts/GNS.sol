@@ -42,16 +42,20 @@ contract GNS is GNSlib{
     /*  PUBLIC
     */
 
+    /** @notice Returns owner of record name
+    */
     function getOwnerForName(string _name) view public returns (address) {
         return _ownerOfName[_name];
     }
 
+    /** @notice Adds new record to register
+    */
     function createRecord(
         string _name,
         bytes _rawRecord)
     onlyOwnerOfName(_name)
     public {
-        require(isValidRecord(_rawRecord));
+//        require(isValidRecord(_rawRecord)); // fixme disabled validity check
         uint128 recordIndex = _existRawRecordsByContent[_rawRecord];
         uint8 typeOfRecord = uint8(_rawRecord[0]);
         if (recordIndex > 0) {
@@ -76,6 +80,8 @@ contract GNS is GNSlib{
         _recordIdsForNameByType[_name][typeOfRecord].push(recordIndex);
     }
 
+    /** @notice Removes record based on ID
+    */
     function removeRecordById(
         string _name,
         uint128 _recordId)
@@ -92,6 +98,8 @@ contract GNS is GNSlib{
         }
     }
 
+    /** @notice Removes record based on data
+    */
     function removeRecordByValue(
         string _name,
         bytes _rawRecord)
@@ -104,11 +112,15 @@ contract GNS is GNSlib{
         removeRecordById(_name, recordIndex);
     }
 
+    /** @notice Returns record based on ID
+    */
     function getRawRecordById(uint128 _recordId) view public returns (bytes){
         require(_recordId >= 0 && _recordId < _records.length);
         return _records[_recordId];
     }
 
+    /** @notice Returns record array
+    */
     function getRecordsList(string _name)
     view
     public
@@ -117,6 +129,8 @@ contract GNS is GNSlib{
         return _recordIdsForName[_name];
     }
 
+    /** @notice Returns record array by type
+    */
     function getRecordsList(string _name,
         uint8 _typeOfRecord)
     view
@@ -126,6 +140,8 @@ contract GNS is GNSlib{
         return _recordIdsForNameByType[_name][_typeOfRecord];
     }
 
+    /** @notice Checks whether name in register exists
+    */
     function isNameExist(string _name) view public returns (bool){
         return _ownerOfName[_name] != 0;
     }
@@ -143,37 +159,4 @@ contract GNS is GNSlib{
             }
         }
     }
-
-    /*
-    "name"
-    "name1"
-    "name2"
-    -------create valid---------
-    "name",0x0000000003313233
-    "name",0x0000000003312e33
-    "name",0x0000000003714233
-    "name1",0x0000000003714233
-    "name",0x01ffffffaa
-    "name",0x01ffbbffaa
-    "name",0x02ffbbffaaffbbffaaffbbffaaffbbffaa
-    "name",0x03313233
-    "name",0x03313333
-    -------filter valid---------
-    "name",0x00
-    "name",0x01
-    "name",0x02
-    "name",0x03
-    "name1",0x00
-    "name2",0x00
-    ---------removing-----
-    "name",5
-    "name",0x01ffbbffaa
-    ---------invalid---------
-    "na.me",0x0000000003313233
-    "name",0x00000000033132
-    "name",0x01ffffaa
-    "name",0x02ffbbffaaffbbffaaffbbffaaffbbff
-    "name",0x03
-    "name22",5
-    */
 }
